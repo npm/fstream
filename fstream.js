@@ -265,7 +265,7 @@ function create (me) {
         break
 
       case "SymbolicLink":
-        fs.symlink(me.path, me.linkpath, next)
+        fs.symlink(me.linkpath, me.path, next)
         break
 
       case "File":
