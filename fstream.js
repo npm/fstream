@@ -8,6 +8,9 @@ var fs = require("graceful-fs")
   , rimraf = require("rimraf")
   , mkdir = require("mkdirp")
   , path = require("path")
+  , umask = process.umask()
+  , dirmode = 0777 & (~umask)
+  , filemode = 0644 & (~umask)
 
 function Reader (opts) {
   if (typeof opts === "string") opts = { path: opts }
@@ -26,6 +29,7 @@ function Reader (opts) {
   me.filter = typeof opts.filter === "function" ? opts.filter : null
   me.depth = opts.depth || 0
   me.parent = opts.parent || null
+  me.root = opts.root || (opts.parent && opts.parent.root) || me
   me.path = opts.path
   me.basename = path.basename(opts.path)
   me.dirname = path.dirname(opts.path)
@@ -96,6 +100,7 @@ function dirWalk (me) {
       var fst = Reader({ path: path.resolve(me.path, entries[f])
                        , filter: me.filter
                        , depth: me.depth + 1
+                       , root: me.root
                        , parent: me })
 
       fst.on("error", function (e) {
@@ -134,9 +139,10 @@ function proxyEvents (evs, from, to) {
 }
 
 Reader.prototype.pipe = function (dest, opts) {
-  if (this.type === "Directory" && typeof dest.add === "function") {
+  var me = this
+  if (typeof dest.add === "function") {
     // piping to a multi-compatible, and we've got directory entries.
-    this.on("entry", function (entry) {
+    me.on("entry", function (entry) {
       dest.add(entry)
     })
   }
@@ -171,9 +177,10 @@ function Writer (props) {
   me.depth = props.depth || 0
   me.clobber = false === props.clobber ? props.clobber : true
   me.parent = props.parent || null
+  me.root = props.root || (props.parent && props.parent.root) || me
   me.path = props.path
-  me.basename = path.basename(opts.path)
-  me.dirname = path.dirname(opts.path)
+  me.basename = path.basename(props.path)
+  me.dirname = path.dirname(props.path)
   me.linkpath = props.linkpath || null
 
   me.readable = false
@@ -214,7 +221,8 @@ function Writer (props) {
     me._old = current
 
     if (!recreate) {
-      setProps(me, current)
+      if (wantedType == "File") create(me)
+      else setProps(me, current)
       return
     }
 
@@ -242,12 +250,16 @@ function clobber (me) {
 }
 
 function create (me) {
-  mkdir(path.dirname(me.path), me.mode & 0777, function (er) {
+  if (typeof me.props.mode !== "number") {
+    me.props.mode = (me.type === "Directory" ? 0777 : 0666) & (~umask)
+  }
+
+  mkdir(me.dirname, dirmode, function (er) {
     if (er) return me.emit("error", me)
 
     switch (me.type) {
       case "Directory":
-        mkdir(me.path, me.mode & 0777, next)
+        mkdir(me.path, me.props.mode & 0777, next)
         break
 
       case "SymbolicLink":
@@ -255,7 +267,8 @@ function create (me) {
         break
 
       case "File":
-        me._stream = fs.createWriteStream(me.path, me.props)
+        var s = me._stream = fs.createWriteStream(me.path, me.props)
+        proxyEvents(["open", "error", "drain", "close"], s, me)
         me._stream.on("open", function (fd) {
           next()
         })
@@ -347,12 +360,16 @@ function setProps (me, current) {
     me._ready = true
     var buffer = me._buffer
     if (buffer.length) {
-      me.buffer = []
+      me._buffer = []
       buffer.forEach(function (c) {
         me[c[0]](c[1])
       })
     }
   }
+}
+
+function objectToString (d) {
+  return Object.prototype.toString.call(d)
 }
 
 function isDate(d) {
@@ -412,12 +429,38 @@ Writer.prototype.add = function (entry) {
     return
   }
 
-  entry.path = path.join(me.path, entry.path)
-  entry.parent = me
-  entry.depth = me.depth + 1
+  // don't allow recursive copying!
+  var p = entry
+  do {
+    if (p.path === me.path) return
+  } while (p = p.parent)
 
-  entry = new Writer(entry)
-  me.emit("entry", entry)
+  // chop the entry's parent's dir
+  var opts = { parent: me
+             , root: me.root || me
+             , type: entry.type
+             , depth: me.depth + 1 }
+
+  var p = entry.path
+    , root = entry.root || entry.parent
+  if (root) {
+    p = p.substr(root.path.length + 1)
+  }
+  opts.path = path.join(me.path, p)
+
+  var child = new Writer(opts)
+  // directories are already handled.
+  if (entry.type !== "Directory") {
+    entry.pipe(child)
+  }
+
+  child.on("entry", function (entry) {
+    me.emit("entry", entry)
+  })
+
+  child.on("stat", function () {
+    me.emit("entry", child)
+  })
 }
 
 
@@ -440,6 +483,10 @@ function getType (st) {
       , "FIFO"
       , "Socket" ]
     , type
+
+  if (st.type && -1 !== types.indexOf(st.type)) {
+    return st.type
+  }
 
   for (var i = 0, l = types.length; i < l; i ++) {
     type = types[i]
