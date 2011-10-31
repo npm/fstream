@@ -182,6 +182,8 @@ function Writer (props) {
   me.basename = path.basename(props.path)
   me.dirname = path.dirname(props.path)
   me.linkpath = props.linkpath || null
+  me.size = props.size
+  me._bytesWritten = 0
 
   if (typeof props.mode === "string") props.mode = parseInt(props.mode, 8)
 
@@ -274,6 +276,15 @@ function create (me) {
         me._stream.on("open", function (fd) {
           next()
         })
+        if (typeof me.size === "number") {
+          me._stream.on("close", function () {
+            if (me._bytesWritten !== me.size) {
+              me.emit("error", new Error("Wrong byte count\n" +
+                                         "Expected: " + me.size + "\n" +
+                                         "Actual:   " + me._byteCount))
+            }
+          })
+        }
         break
 
       default:
@@ -412,6 +423,13 @@ Writer.prototype.write = function (c) {
     return true
   }
 
+  if (typeof c === "string") c = new Buffer(c)
+  if (!Buffer.isBuffer(c)) {
+    me.emit("error", new Error("can only write strings or buffers"))
+    return
+  }
+
+  me._bytesWritten += c.length
   return me._stream.write(c)
 }
 
