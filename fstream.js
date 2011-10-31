@@ -183,6 +183,8 @@ function Writer (props) {
   me.dirname = path.dirname(props.path)
   me.linkpath = props.linkpath || null
 
+  if (typeof props.mode === "string") props.mode = parseInt(props.mode, 8)
+
   me.readable = false
   me.writable = true
 
@@ -251,7 +253,7 @@ function clobber (me) {
 
 function create (me) {
   if (typeof me.props.mode !== "number") {
-    me.props.mode = (me.type === "Directory" ? 0777 : 0666) & (~umask)
+    me.props.mode = me.type === "Directory" ? dirmode : filemode
   }
 
   mkdir(me.dirname, dirmode, function (er) {
