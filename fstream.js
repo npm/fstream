@@ -7,6 +7,7 @@ var fs = require("graceful-fs")
   , inherits = require("inherits")
   , rimraf = require("rimraf")
   , mkdir = require("mkdirp")
+  , path = require("path")
 
 function Reader (opts) {
   if (typeof opts === "string") opts = { path: opts }
@@ -26,17 +27,22 @@ function Reader (opts) {
   me.depth = opts.depth || 0
   me.parent = opts.parent || null
   me.path = opts.path
+  me.basename = path.basename(opts.path)
+  me.dirname = path.dirname(opts.path)
 
   fs[stat](me.path, function (er, props) {
     if (er) return me.emit("error", er)
     me.props = props
     me.type = getType(props)
-    me.emit("stat", props)
 
+    // if the filter doesn't pass, then just skip over this one.
+    // still have to emit end so that dir-walking can move on.
     if (me.filter) {
-      var ret = me.filter(props)
+      var ret = me.filter()
       if (!ret) return me.emit("end")
     }
+
+    me.emit("stat", props)
 
     // if it's a directory, then we'll be emitting "file" events.
     if (props.isDirectory()) {
@@ -96,8 +102,13 @@ function dirWalk (me) {
         me.emit("error", e)
       })
 
-      fst.on("props", function (p) {
+      fst.on("stat", function (p) {
         me.emit("entry", fst)
+      })
+
+      // bubble up
+      fst.on("entry", function (entry) {
+        me.emit("entry", entry)
       })
 
       fst.on("end", function () {
@@ -161,6 +172,8 @@ function Writer (props) {
   me.clobber = false === props.clobber ? props.clobber : true
   me.parent = props.parent || null
   me.path = props.path
+  me.basename = path.basename(opts.path)
+  me.dirname = path.dirname(opts.path)
   me.linkpath = props.linkpath || null
 
   me.readable = false
@@ -431,7 +444,7 @@ function getType (st) {
   for (var i = 0, l = types.length; i < l; i ++) {
     type = types[i]
     var is = st[type] || st["is" + type]
-    if (typeof is === "function") is = is()
+    if (typeof is === "function") is = is.call(st)
     if (is) {
       st[type] = true
       st.type = type
