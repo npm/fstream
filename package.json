@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "rimraf": "~1.0.8",
-    "mkdirp": "0.0.7"
+    "mkdirp": "0.0.7",
+    "graceful-fs": "~1.0.1"
   },
   "devDependencies": {}
 }
