@@ -11,6 +11,9 @@
   "engines": {
     "node": "0.5 || 0.6"
   },
-  "dependencies": {},
+  "dependencies": {
+    "rimraf": "~1.0.8",
+    "mkdirp": "0.0.7"
+  },
   "devDependencies": {}
 }
