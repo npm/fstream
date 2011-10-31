@@ -293,6 +293,7 @@ function setProps (me, current) {
   // set up all the things.
   var todo = 0
   var errState = null
+  var done = false
 
   // mode
   var wantMode = me.props.mode
@@ -338,12 +339,18 @@ function setProps (me, current) {
 
     if (meA.getTime() !== curA.getTime() ||
         meM.getTime() !== curM.getTime()) {
-      todo ++
-      if (me._stream && me._stream.fd && fs.futimes) {
-        fs.futimes(me._stream.fd, meA, meM, next)
+      if (me._stream) {
+        // can't set them now, since we'll be touching the file.
+        me._stream.on("end", setTimes)
+        me._stream.on("close", setTimes)
       } else {
-        fs.utimes(me.path, meA, meM, next)
+        todo ++
+        setTimes()
       }
+    }
+
+    function setTimes () {
+      fs.utimes(me.path, meA, meM, next)
     }
   }
 
@@ -354,6 +361,9 @@ function setProps (me, current) {
     if (errState) return
     if (er) return me.emit("error", errState = er)
     if (--todo > 0) return
+    if (done) return
+
+    done = true
 
     // all the props have been set, now see if we got any pending writes
     // in the meantime.
@@ -447,6 +457,13 @@ Writer.prototype.add = function (entry) {
     p = p.substr(root.path.length + 1)
   }
   opts.path = path.join(me.path, p)
+
+  // all the rest of the stuff, copy over from the source.
+  Object.keys(entry.props).forEach(function (k) {
+    if (!opts.hasOwnProperty(k)) {
+      opts[k] = entry.props[k]
+    }
+  })
 
   var child = new Writer(opts)
   // directories are already handled.
