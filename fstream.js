@@ -215,7 +215,8 @@ function Writer (props) {
       , wantedType = me.type = getType(props) || currentType || "File"
       , creatable = wantedType === "Directory" ||
                     wantedType === "File" ||
-                    wantedType === "SymbolicLink"
+                    wantedType === "SymbolicLink" ||
+                    wantedType === "Link"
       , recreate = wantedType !== currentType
 
     Object.keys(current || {}).forEach(function (k) {
@@ -230,7 +231,8 @@ function Writer (props) {
       return
     }
 
-    if (wantedType === "SymbolicLink" && !me.linkpath) {
+    if ((wantedType === "SymbolicLink" || wantedType === "Link") &&
+        !me.linkpath) {
       return me.emit("error", new Error(
         "Cannot create symlink without linkpath"))
     }
@@ -268,6 +270,10 @@ function create (me) {
 
       case "SymbolicLink":
         fs.symlink(me.linkpath, me.path, next)
+        break
+
+      case "Link":
+        fs.link(me.linkpath, me.path, next)
         break
 
       case "File":
@@ -462,6 +468,7 @@ Writer.prototype.add = function (entry) {
   // don't allow recursive copying!
   var p = entry
   do {
+    // console.error("resursive?", p.path, me.path, p.path === me.path)
     if (p.path === me.path) return
   } while (p = p.parent)
 
@@ -515,6 +522,7 @@ function getType (st) {
       [ "Directory"
       , "File"
       , "SymbolicLink"
+      , "Link" // special for hardlinks from tarballs
       , "BlockDevice"
       , "CharacterDevice"
       , "FIFO"
