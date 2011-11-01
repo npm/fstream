@@ -1,7 +1,7 @@
 {
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
   "name": "fstream",
-  "description": "Advanced FS Streams",
+  "description": "Advanced file system stream things",
   "version": "0.0.0",
   "repository": {
     "type": "git",
