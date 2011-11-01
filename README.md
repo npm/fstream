@@ -73,15 +73,4 @@ fstream
 This will do like `cp -Rp path/to/dir path/to/other/dir`.  If the other
 dir exists and isn't a directory, then it'll emit an error.  It'll also
 set the uid, gid, mode, etc. to be identical.  In this way, it's more
-like `rsync -a` than simply a copy
-```javascript
-fstream
-  .Writer({ path: "path/to/file"
-          , mode: 0755
-          , size: 6
-          })
-  .write("hello\n")
-  .end()
-```
-
-.
+like `rsync -a` than simply a copy.
