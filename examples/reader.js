@@ -7,12 +7,21 @@ var r = fstream.Reader({ path: path.dirname(__dirname)
                          }
                        })
 
+console.error(r instanceof fstream.Reader)
+console.error(r instanceof require("stream").Stream)
+console.error(r instanceof require("events").EventEmitter)
+console.error(r.on)
+
+r.on("stat", function () {
+  console.error("a %s !!!\t", r.type, r.path)
+})
+
 r.on("entries", function (entries) {
-  console.error("the entries", entries)
+  console.error("\t" + entries.join("\n\t"))
 })
 
 r.on("entry", function (entry) {
-  console.error("a %s appears!", entry.type, entry.path)
+  console.error("a %s !!!\t", entry.type, entry.path)
 })
 
 r.on("end", function () {

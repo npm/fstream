@@ -1,6 +1,6 @@
 var fstream = require("../fstream.js")
 var path = require("path")
-
+debugger
 var r = fstream.Reader({ path: path.dirname(__dirname)
                        , filter: function () {
                            return !this.basename.match(/^\./) &&
