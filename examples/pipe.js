@@ -22,6 +22,7 @@ r.on("entry", appears)
 //})
 
 function appears (entry) {
+  if (foggy) console.error("FOGGY!")
   console.error(indent + "a %s appears!", entry.type, entry.basename)
   indent += "\t"
   entry.on("data", missile(entry))
@@ -30,38 +31,38 @@ function appears (entry) {
 }
 
 var foggy
-function missile (entry) { return function (c) {
+function missile (entry) {
   if (entry.type === "Directory") {
-    if (!foggy && Math.random() < 0.3) {
-      console.error(indent +"%s casts a spell", entry.basename)
-      console.error("\na fog comes over the battlefield...\n\033[32m")
-      r.pause()
-      r.__resume = r.resume
-      r.resume = r.pause
-      w.once("drain", function f () {
-        if (foggy) {
-          console.error("\ntrying to lift the fog!\n")
-          r.pause()
-          w.once("drain", f)
+    return function (c) {
+      // return
+      process.nextTick(function () {
+        if (!foggy) { // && Math.random() < 0.3) {
+          console.error(indent +"%s casts a spell", entry.basename)
+          console.error("\na fog comes over the battlefield...\n\033[32m")
+          entry.pause()
+          entry.once("resume", liftFog)
+          foggy = setTimeout(liftFog, 1000)
+          function liftFog () {
+            if (!foggy) return
+            console.error(entry.path)
+            console.error("\n\033[mthe fog lifts!\n")
+            clearTimeout(foggy)
+            foggy = null
+            if (entry._paused) entry.resume()
+          }
         }
       })
-      foggy = setTimeout(function () {
-        console.error("\n\033[mthe fog lifts!\n")
-        setTimeout(function () {
-          foggy = null
-          r.resume = r.__resume
-          r.resume()
-        }, 300)
-      }, 1000)
     }
-    return
   }
-  var e = Math.random() < 0.5
-  console.error(indent + "%s %s for %d damage!",
-              entry.basename,
-              e ? "is struck" : "fires a chunk",
-              c.length)
-}}
+
+  return function (c) {
+    var e = Math.random() < 0.5
+    console.error(indent + "%s %s for %d damage!",
+                entry.basename,
+                e ? "is struck" : "fires a chunk",
+                c.length)
+  }
+}
 
 function runaway (entry) { return function () {
   var e = Math.random() < 0.5
