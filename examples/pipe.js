@@ -34,22 +34,29 @@ var foggy
 function missile (entry) {
   if (entry.type === "Directory") {
     return function (c) {
-      // return
+      // throw in some pathological pause()/resume() behavior
+      // just for extra fun.
       process.nextTick(function () {
-        if (!foggy) { // && Math.random() < 0.3) {
+        if (!foggy && Math.random() < 0.3) {
           console.error(indent +"%s casts a spell", entry.basename)
-          console.error("\na fog comes over the battlefield...\n\033[32m")
+          console.error("\na slowing fog comes over the battlefield...\n\033[32m")
           entry.pause()
           entry.once("resume", liftFog)
           foggy = setTimeout(liftFog, 1000)
-          function liftFog () {
+
+          function liftFog (who) {
             if (!foggy) return
-            console.error(entry.path)
-            console.error("\n\033[mthe fog lifts!\n")
+            if (who) {
+              console.error("%s breaks the spell!", who && who.path)
+            } else {
+              console.error("the spell expires!")
+            }
+            console.error("\033[mthe fog lifts!\n")
             clearTimeout(foggy)
             foggy = null
             if (entry._paused) entry.resume()
           }
+
         }
       })
     }
