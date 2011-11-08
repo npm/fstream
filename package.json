@@ -2,7 +2,7 @@
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
   "name": "fstream",
   "description": "Advanced file system stream things",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/isaacs/fstream.git"
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "rimraf": "~1.0.8",
-    "mkdirp": "0.0.7",
+    "mkdirp": "~0.1.0",
     "graceful-fs": "~1.0.1",
     "inherits": "~1.0.0"
   },
