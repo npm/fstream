@@ -22,8 +22,16 @@ r.on("entry", appears)
 //})
 
 function appears (entry) {
-  if (foggy) console.error("FOGGY!")
   console.error(indent + "a %s appears!", entry.type, entry.basename)
+  if (foggy) {
+    console.error("FOGGY!")
+    var p = entry
+    do {
+      console.error(p.depth, p.path, p._paused)
+    } while (p = p.parent)
+
+    throw new Error("\033[mshould not have entries while foggy")
+  }
   indent += "\t"
   entry.on("data", missile(entry))
   entry.on("end", runaway(entry))
@@ -33,16 +41,18 @@ function appears (entry) {
 var foggy
 function missile (entry) {
   if (entry.type === "Directory") {
+    var ended = false
+    entry.once("end", function () { ended = true })
     return function (c) {
       // throw in some pathological pause()/resume() behavior
       // just for extra fun.
       process.nextTick(function () {
-        if (!foggy && Math.random() < 0.3) {
+        if (!foggy && !ended) { // && Math.random() < 0.3) {
           console.error(indent +"%s casts a spell", entry.basename)
           console.error("\na slowing fog comes over the battlefield...\n\033[32m")
           entry.pause()
           entry.once("resume", liftFog)
-          foggy = setTimeout(liftFog, 1000)
+          foggy = setTimeout(liftFog, 10)
 
           function liftFog (who) {
             if (!foggy) return
