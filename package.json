@@ -17,5 +17,10 @@
     "graceful-fs": "1.1",
     "inherits": "~1.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "tap": "0.1"
+  },
+  "scripts": {
+    "test": "cd examples; tap *.js"
+  }
 }

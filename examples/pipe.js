@@ -17,12 +17,12 @@ var indent = ""
 var escape = {}
 
 r.on("entry", appears)
-//r.on("ready", function () {
-//  appears(r)
-//})
+r.on("ready", function () {
+  console.error("ready to begin!", r.path)
+})
 
 function appears (entry) {
-  console.error(indent + "a %s appears!", entry.type, entry.basename)
+  console.error(indent + "a %s appears!", entry.type, entry.basename, typeof entry.basename, entry)
   if (foggy) {
     console.error("FOGGY!")
     var p = entry
@@ -103,11 +103,13 @@ r.on("end", function () {
   if (foggy) clearTimeout(foggy)
   console.error("\033[mIT'S OVER!!")
   console.error("A WINNAR IS YOU!")
+
+  console.log("ok 1 A WINNAR IS YOU")
   ended = true
 })
 
 process.on("exit", function () {
-  console.error("ended? "+ended)
+  console.log((ended ? "" : "not ") + "ok 2 ended")
 })
-r.pipe(w)
 
+r.pipe(w)
