@@ -18,11 +18,15 @@ tap.test("reader test", function (t) {
   r.on("ready", function () {
     gotReady = true
     children = r.props.nlink
+    console.error("Setting expected children to "+children)
     t.equal(r.type, "Directory", "should be a directory")
   })
 
   r.on("entry", function (entry) {
     children --
+    if (!gotReady) {
+      t.fail("children before ready!")
+    }
     t.equal(entry.dirname, r.path, "basename is parent dir")
   })
 
