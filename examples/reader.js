@@ -1,14 +1,16 @@
 var fstream = require("../fstream.js")
 var tap = require("tap")
+var fs = require("fs")
 var path = require("path")
 var children = -1
+var dir = path.dirname(__dirname)
 
 var gotReady = false
 var ended = false
 
 tap.test("reader test", function (t) {
 
-  var r = fstream.Reader({ path: path.dirname(__dirname)
+  var r = fstream.Reader({ path: dir
                          , filter: function () {
                              // return this.parent === r
                              return this.parent === r || this === r
@@ -17,7 +19,7 @@ tap.test("reader test", function (t) {
 
   r.on("ready", function () {
     gotReady = true
-    children = r.props.nlink
+    children = fs.readdirSync(dir).length
     console.error("Setting expected children to "+children)
     t.equal(r.type, "Directory", "should be a directory")
   })
@@ -37,8 +39,7 @@ tap.test("reader test", function (t) {
   })
 
   r.on("end", function () {
-    // 2 because "." and ".." aren't traversed
-    t.equal(children, 2, "should have seen all children")
+    t.equal(children, 0, "should have seen all children")
     ended = true
   })
 

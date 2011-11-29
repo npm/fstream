@@ -21,6 +21,6 @@
     "tap": "0.1"
   },
   "scripts": {
-    "test": "tap examples/*.js || node examples/reader.js"
+    "test": "tap examples/*.js"
   }
 }
