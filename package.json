@@ -18,7 +18,7 @@
     "inherits": "~1.0.0"
   },
   "devDependencies": {
-    "tap": "0.1"
+    "tap": ""
   },
   "scripts": {
     "test": "tap examples/*.js"
