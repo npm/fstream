@@ -22,5 +22,6 @@
   },
   "scripts": {
     "test": "tap examples/*.js"
-  }
+  },
+  "license": "BSD"
 }
