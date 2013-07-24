@@ -15,7 +15,7 @@
     "rimraf": "2",
     "mkdirp": "0.3",
     "graceful-fs": "~2.0.0",
-    "inherits": "~1.0.0"
+    "inherits": "~2.0.0"
   },
   "devDependencies": {
     "tap": ""
