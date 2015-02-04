@@ -18,10 +18,11 @@
     "rimraf": "2"
   },
   "devDependencies": {
-    "tap": ""
+    "tap": "",
+    "standard": "^2.3.2"
   },
   "scripts": {
-    "test": "tap examples/*.js"
+    "test": "standard && tap examples/*.js"
   },
   "license": "BSD"
 }
