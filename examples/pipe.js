@@ -82,13 +82,15 @@ function missile (entry) {
   }
 }
 
-function runaway (entry) { return function () {
-  var e = Math.random() < 0.5
-  console.error(indent + '%s %s',
-                entry.basename,
-                e ? 'turns to flee' : 'is vanquished!')
-  indent = indent.slice(0, -1)
-}}
+function runaway (entry) {
+  return function () {
+    var e = Math.random() < 0.5
+    console.error(indent + '%s %s',
+                  entry.basename,
+                  e ? 'turns to flee' : 'is vanquished!')
+    indent = indent.slice(0, -1)
+  }
+}
 
 w.on('entry', attacks)
 // w.on('ready', function () { attacks(w) })
