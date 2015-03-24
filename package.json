@@ -19,7 +19,8 @@
   },
   "devDependencies": {
     "tap": "",
-    "standard": "^2.3.2"
+    "standard": "^2.3.2",
+    "temp": "^0.8.1"
   },
   "scripts": {
     "test": "standard && tap examples/*.js"
