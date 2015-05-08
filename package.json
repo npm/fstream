@@ -24,5 +24,5 @@
   "scripts": {
     "test": "standard && tap examples/*.js"
   },
-  "license": "BSD"
+  "license": "ISC"
 }
