@@ -18,7 +18,7 @@
     "rimraf": "2"
   },
   "devDependencies": {
-    "tap": "",
+    "tap": "0",
     "standard": "^2.3.2"
   },
   "scripts": {
