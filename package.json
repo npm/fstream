@@ -18,8 +18,8 @@
     "rimraf": "2"
   },
   "devDependencies": {
-    "tap": "0",
-    "standard": "^2.3.2"
+    "standard": "^4.0.0",
+    "tap": "^1.2.0"
   },
   "scripts": {
     "test": "standard && tap examples/*.js"
