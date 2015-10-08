@@ -5,7 +5,7 @@
   "version": "1.0.8",
   "repository": {
     "type": "git",
-    "url": "git://github.com/isaacs/fstream.git"
+    "url": "https://github.com/npm/fstream.git"
   },
   "main": "fstream.js",
   "engines": {
