@@ -21,11 +21,12 @@ same as the intended size, if the size is set.
 
 ```javascript
 fstream
-  .Writer({ path: "path/to/file"
-          , mode: 0755
-          , size: 6
-          })
-  .write("hello\n")
+  .Writer({
+    path: 'path/to/file',
+    mode: parseInt('0755', 8),
+    size: 6
+  })
+  .write('hello\n')
   .end()
 ```
 
@@ -35,12 +36,13 @@ been written when it's done.
 
 ```javascript
 fstream
-  .Writer({ path: "path/to/file"
-          , mode: 0755
-          , size: 6
-          , flags: "a"
-          })
-  .write("hello\n")
+  .Writer({
+    path: 'path/to/file',
+    mode: parseInt('0755', 8),
+    size: 6,
+    flags: 'a'
+  })
+  .write('hello\n')
   .end()
 ```
 
@@ -48,11 +50,12 @@ You can pass flags in, if you want to append to a file.
 
 ```javascript
 fstream
-  .Writer({ path: "path/to/symlink"
-          , linkpath: "./file"
-          , SymbolicLink: true
-          , mode: "0755" // octal strings supported
-          })
+  .Writer({
+    path: 'path/to/symlink',
+    linkpath: './file',
+    SymbolicLink: true,
+    mode: '0755' // octal strings supported
+  })
   .end()
 ```
 
@@ -74,3 +77,56 @@ This will do like `cp -Rp path/to/dir path/to/other/dir`.  If the other
 dir exists and isn't a directory, then it'll emit an error.  It'll also
 set the uid, gid, mode, etc. to be identical.  In this way, it's more
 like `rsync -a` than simply a copy.
+
+# API
+
+## Abstract (extends `Stream`)
+
+A base class that extends [`Stream`](https://nodejs.org/api/stream.html) with
+useful utility methods. `fstream` streams are based on [streams1
+semantics](https://gist.github.com/caike/ebccc95bd46f5fa1404d#file-streams-1-js).
+
+### events
+
+- `abort`: Stop further processing on the stream.
+- `ready`: The stream is ready for reading; handlers passed to `.on()` will
+  still be called if the stream is ready even if they're added after `ready` is
+  emitted.
+- `info`: Quasi-logging event emitted for diagnostic information.
+- `warn`: Quasi-logging event emitted on non-fatal errors.
+- `error`: Quasi-logging event emitted on fatal errors.
+
+### properties
+
+- `ready`: Whether the current file stream is ready to start processing. _Default: `false`_
+- `path`: Path to the filesystem object this node is bound to.
+- `linkpath`: Target path to which a link points.
+- `type`: What type of filesystem entity this file stream node points to.
+
+### abstract.abort()
+
+Stop any further processing on the file stream by setting `this._aborted`; for
+use by subclasses.
+
+### abstract.destroy()
+
+Abstract base method; overrides `Stream`'s `destroy` as a no-op.
+
+### abstract.info(msg, code)
+
+Quasi-logging method.
+
+Emits an `info` event with `msg` and `code` attached.
+
+### abstract.warn(msg, code)
+
+Quasi-logging method.
+
+Emits a `warn` event if it has any listeners; otherwise prints out an error
+object decorated with `msg` and `code` to stderr.
+
+### abstract.error(msg, code, throw)
+
+If `throw` is true, throw an Error decorated with the message or code.
+Otherwise, emit `error` with the decorated Error. `msg` can also be an Error
+object itself; it will be wrapped in a new Error before being annotated.
