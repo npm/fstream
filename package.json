@@ -14,8 +14,8 @@
   "dependencies": {
     "graceful-fs": "^4.1.2",
     "inherits": "~2.0.0",
-    "mkdirp": ">=0.5 0",
-    "rimraf": "2"
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.5.2"
   },
   "devDependencies": {
     "standard": "^4.0.0",
