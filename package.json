@@ -14,15 +14,17 @@
   "dependencies": {
     "graceful-fs": "^4.1.2",
     "inherits": "~2.0.0",
-    "mkdirp": ">=0.5 0",
-    "rimraf": "2"
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.5.2"
   },
   "devDependencies": {
-    "standard": "^4.0.0",
-    "tap": "^1.2.0"
+    "standard": "^6.0.8",
+    "tap": "^5.7.1"
   },
   "scripts": {
-    "test": "standard && tap examples/*.js"
+    "test": "standard && tap --coverage test/*.js",
+    "test-legacy": "tap examples/*.js",
+    "coverage-report": "tap --coverage --coverage-report=html examples/*.js test/*.js"
   },
   "license": "ISC"
 }
