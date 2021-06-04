@@ -12,7 +12,7 @@
     "node": ">=0.6"
   },
   "dependencies": {
-    "graceful-fs": "^4.1.2",
+    "graceful-fs": "^4.2.2",
     "inherits": "~2.0.0",
     "mkdirp": "^0.5 0",
     "rimraf": "2"
